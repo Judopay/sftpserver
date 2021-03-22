@@ -45,7 +45,7 @@ Generating a test private key::
 Connecting with a Python client to our server:
 
 >>> import paramiko
->>> pkey = paramiko.RSAKey.from_private_key_file('/tmp/test_rsa.key')
+>>> pkey = paramiko.RSAKey.from_private_key_file('~/.ssh/local_rsa.key','<<passphrase>>')
 >>> transport = paramiko.Transport(('localhost', 3373))
 >>> transport.connect(username='admin', password='admin', pkey=pkey)
 >>> sftp = paramiko.SFTPClient.from_transport(transport)

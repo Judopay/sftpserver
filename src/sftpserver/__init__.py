@@ -38,7 +38,7 @@ HOST, PORT = 'localhost', 3373
 BACKLOG = 10
 
 
-def start_server(host, port, keyfile, level):
+def start_server(host, port, keyfile, level, keyfile_password):
     paramiko_level = getattr(paramiko.common, level)
     paramiko.common.logging.basicConfig(level=paramiko_level)
 
@@ -49,8 +49,7 @@ def start_server(host, port, keyfile, level):
 
     while True:
         conn, addr = server_socket.accept()
-
-        host_key = paramiko.RSAKey.from_private_key_file(keyfile)
+        host_key = paramiko.RSAKey.from_private_key_file(keyfile, keyfile_password)
         transport = paramiko.Transport(conn)
         transport.add_server_key(host_key)
         transport.set_subsystem_handler(
@@ -74,8 +73,9 @@ def main():
         '--host', dest='host', default=HOST,
         help='listen on HOST [default: %(default)s]'
     )
+
     parser.add_argument(
-        '-p', '--port', dest='port', type=int, default=PORT,
+        '--port', dest='port', type=int, default=PORT,
         help='listen on PORT [default: %(default)d]'
     )
     parser.add_argument(
@@ -83,8 +83,13 @@ def main():
         help='Debug level: WARNING, INFO, DEBUG [default: %(default)s]'
     )
     parser.add_argument(
-        '-k', '--keyfile', dest='keyfile', metavar='FILE',
+        '--keyfile', dest='keyfile', metavar='FILE',
         help='Path to private key, for example /tmp/test_rsa.key'
+    )
+
+    parser.add_argument(
+        '--keyfile_password', dest='keyfile_password', default=None,
+        help='password used to decrpyt key file'
     )
 
     args = parser.parse_args()
@@ -93,7 +98,7 @@ def main():
         parser.print_help()
         sys.exit(-1)
 
-    start_server(args.host, args.port, args.keyfile, args.level)
+    start_server(args.host, args.port, args.keyfile, args.level, args.keyfile_password)
 
 
 if __name__ == '__main__':
